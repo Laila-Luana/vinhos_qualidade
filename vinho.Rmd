@@ -1,0 +1,227 @@
+---
+title: "Projeto Final"
+author: "Laíla Luana Campos"
+date: "11/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<div style="text-align: justify"> 
+
+**Projeto II: Vinhos**
+
+[ANÁLISE DA QUALIDADE DE VINHOS](#heading-3)
+
+O objetivo do projeto é construir um modelo de classificação que preveja sua qualidade com base nas características físicas e químicas do vinho (a qualidade do vinho foi avaliada com base em seu sabor). Sobre os dados podem ser lidos aqui: P. Cortez, A. Cerdeira, F. Almeida, T. Matos e J. Reis. Modelagem de preferências de vinho por mineração de dados a partir de propriedades físico-químicas. Em Decision Support Systems, Elsevier, 47 (4): 547553, 2009 (pré-impressão em pdf: http://www3.dsi.uminho.pt/pcortez/wine5.pdf). Os dados originais foram levemente modificados (entre outros, na coleção original, a classificação do vinho era mais diversificada e variava de 3 a 9). Neste projeto cujos dados encontram-se no link:  http://www3.dsi.uminho.pt/pcortez/wine/. Nota: Seguir os passos semelhante ao do Projeto I.  
+
+O conjunto de dados de vinho tinho, com $1599$ observações em $12$ variáveis, sendo elas:
+
+* Acidez: Atribuída como fator com 96 níveis;
+* Volatilidade;
+* Ácido citrico;
+* Açucar residual;
+* Dióxido de enxofre livre;
+* Cloretos;
+* Dióxido de enxofre total;
+* Densidade;
+* Ph;
+* Sulfatos.
+* Alcool;
+* Qualidade (resposta).
+
+```{r, include=TRUE, message=F}
+dados = read.csv2("winequality-red.csv")
+```
+
+*Estatísticas descritivas em relação à qualidade dos vinhos:* 
+
+```{r, include=TRUE, message=F}
+
+# Qualidade média:
+
+( qualidade_media <- mean(dados$quality) )
+
+# Qualidade máxima:
+
+( qualidade_max <- max(dados$quality) )
+
+# Qualidade mínima:
+
+( qualideade_min <- min(dados$quality))
+
+```
+
+Proporção de vinhos com qualidade inferior à média da qualidade dos vinhos:
+
+```{r, include=TRUE, message=F}
+
+ruim <- dados[dados$quality < qualidade_media, ] 
+prop.table(table(ruim$quality))
+
+```
+
+Proporção de vinhos com qualidade superior à média da qualidade dos vinhos:
+
+```{r, include=TRUE, message=F}
+
+melhores <- dados[dados$quality > qualidade_media, ] 
+prop.table(table(melhores$quality))
+
+```
+
+
+
+```{r, include=TRUE, message=F}
+
+acidez <- as.numeric(dados$fixed.acidity)
+volatilidade <- as.numeric(dados$volatile.acidity)
+acido_citrico <- as.numeric(dados$citric.acid)
+acucar <- as.numeric(dados$residual.sugar)
+enxofre_livre <- as.numeric(dados$chlorides)
+cloretos <- as.numeric(dados$free.sulfur.dioxide)
+enxofre <- as.numeric(dados$total.sulfur.dioxide)
+densidade <- as.numeric(dados$density)
+ph <- as.numeric(dados$pH)
+sulfatos <- as.numeric(dados$sulphates)
+alcool <- as.numeric(dados$alcohol)
+qualidade <- as.numeric(dados$quality)
+```
+
+
+```{r, include=TRUE, message=F}
+plot(qualidade)
+```
+
+Modelando a qualidade do vinho como variável resposta dependente de todas as demais variáveis (acidez, volatilidade, acido_citrico, acucar, enxofre_livre, cloretos, enxofre, densidade, ph, sulfatos e alcool), observa-se que algumas variávies não foram significativas.
+
+```{r, include=TRUE, message=F}
+
+modelo <- lm(qualidade ~ acidez + volatilidade + acido_citrico + acucar + enxofre_livre + cloretos + enxofre + densidade + ph + sulfatos + alcool)
+
+summary(modelo)
+
+```
+
+Desta forma, ajustou-se um novo modelo em que as variáveis não significativas (ácido cítrico, ph, cloretos e enxofre) do modelo anterior foram retiradas. 
+
+```{r, include=TRUE, message=F}
+
+modelo_1 <- lm(qualidade ~ acidez + volatilidade  + acucar + enxofre_livre + densidade + sulfatos + alcool)
+
+summary(modelo_1)
+
+```
+
+Então, o modelo da qualidade do vinho tinto pode ser escrito da seguinte forma:
+
+\begin{equation}
+ qualidade = 6,4430464 - 0,0026296 \times acidez - 0,0078175 \times volatilidade + 0,0055639 \times acucar - 0,0040779 \times enxofre_livre - 0,0016040 \times densidade + 0,0130206 \times sulfatos - 0,0049666 \times alcool
+\end{equation}
+
+Realizando uma análise descritiva para os vinhos que tiveram a qualidade do vinho maior do que a qualidade média, observa-se que:
+
+* acidez variou entre $6,8$ a $8,2$,
+* volatilidade variou entre $0,34$ a $0,51$,  
+* açúcar variou entre $1,8$ a $2,4$,  
+* enxofre livre variou entre $5$ a $15$,  
+* densidade variou entre $0,9962$ a $0,9994$,  
+* sulfatos variou entre $0,56$ a $0,65$,  
+* álcool variou entre $9,5$ a $11$.
+
+```{r, include=TRUE, message=F}
+
+summary(melhores)
+
+```
+
+
+```{r, include=TRUE, message=F}
+boxplot(melhores)
+```
+
+Realizando uma análise descritiva para os vinhos que tiveram a qualidade do vinho menor do que a qualidade média, observa-se que:
+
+* acidez variou entre $7,1$ a $7,8$, 
+* volatilidade variou entre $0,43$ a $0,64$,   
+* açúcar variou entre $1,8$ a $2,3$, 
+* enxofre livre variou entre $5$ a $15$,
+* densidade variou entre $0.9962$ a $0,998$,  
+* sulfatos variou entre $0,52$ a $0,62$,
+* álcool variou entre $9,2$ a $9,8$. 
+
+```{r, include=TRUE, message=F}
+summary(ruim)
+```
+
+
+```{r, include=TRUE, message=F}
+
+boxplot(ruim)
+```
+
+Desta forma, observa-se que as diferenças principais entre os vinhos que foram classificados como de qualidade superior e inferior que a qualide média, de acordo com as variáveis significativas no modelo foram que os vinhos de qualidade superior tiveram os valores das variáveis:
+
+* acidez inferior,
+* volatilidade inferior,
+* açúcar superior, 
+* enxofre livre se mantiveram iguais,
+* densidade superior,
+* sulfatos superior,
+* álcool superior.
+
+
+Uma outra forma de analisar estes dados, seria iniciando com uma Análise de Componentes Principais ($PCA$), visto o número grande de variáveis disponíveis.  
+
+Analisando então as $PC$, observa-se que as variáveis mais importantes são, na Componente Principal $1$ ($CP1$), a densidade, e, na $CP2$, o enxofre, as quais explicam $99,02\%$ e $-82,60\%$ das $CP1$ e $CP2$, respecetivamente. 
+
+```{r, include=TRUE, message=F}
+dados = read.csv2("winequality-red.csv")
+
+library(FactoMineR);library(factoextra); library(tibble); library(dplyr)
+
+dados = as_tibble(dados)
+dados =  mutate_if(dados, is.factor, as.numeric)
+( PC = prcomp(dados) )
+
+```
+
+
+A primeira CP principal corresponde a $71,6\%$ da variabilidade de todos os dados, e a segunda a $7\%$. Então, considerando apenas as $CPs$ $1$ e $2$, tem-se a explicação de $78,6\%$ da variabilidade total dos dados. 
+
+
+```{r, include=TRUE, message=F}
+library(ggpubr)
+fviz_eig(PC, addlabels = T, ylim=c(0,90))
+```
+
+
+Desta forma, ajustou-se um novo modelo em foram consideradas apenas as variáveis densidade e enxofre:
+
+```{r, include=TRUE, message=F}
+
+modelo_2 <- lm(qualidade ~  densidade + enxofre)
+
+summary(modelo_2)
+
+```
+
+Observa-se que a variável enxofre não foi significativa no modelo. Desta forma, realizou-se um ajuste de um novo modelo retirando o enxofre da análise, considerando, portanto, apenas a $CP1$ que explica $71,6\%$ da variabilidade total dos dados.
+
+
+```{r, include=TRUE, message=F}
+
+modelo_3 <- lm(qualidade ~  densidade )
+
+summary(modelo_3)
+
+```
+
+
+Então, o modelo da qualidade do vinho tinto pode ser escrito da seguinte forma:
+
+\begin{equation}
+ qualidade = 6,004644 -  0,001443 \times densidade 
+\end{equation}
